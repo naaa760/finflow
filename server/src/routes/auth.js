@@ -19,14 +19,20 @@ router.post("/sync", async (req, res) => {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    const user = await prisma.user.upsert({
+    // Check if user exists first
+    let user = await prisma.user.findUnique({
       where: { clerkId },
-      update: { email },
-      create: {
-        clerkId,
-        email,
-      },
     });
+
+    if (!user) {
+      // Create new user if doesn't exist
+      user = await prisma.user.create({
+        data: {
+          clerkId,
+          email,
+        },
+      });
+    }
 
     console.log("User synced successfully:", user);
     res.json({ user });
@@ -34,8 +40,7 @@ router.post("/sync", async (req, res) => {
     console.error("Auth sync error:", error);
     res.status(500).json({
       error: "Failed to sync user",
-      details:
-        process.env.NODE_ENV === "development" ? error.message : undefined,
+      details: error.message,
     });
   }
 });

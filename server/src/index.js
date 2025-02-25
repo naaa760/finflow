@@ -25,12 +25,16 @@ app.use(
     ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "Origin", "Accept"],
+    allowedHeaders: ["Content-Type", "Authorization", "Origin"],
+    exposedHeaders: ["Content-Range", "X-Content-Range"],
   })
 );
 app.use(express.json());
 app.use(helmet());
 app.use(limiter);
+
+// Add preflight handling
+app.options("*", cors());
 
 // Basic health check route
 app.get("/api/health", (req, res) => {
