@@ -10,6 +10,9 @@ const nextConfig = {
       },
     ],
   },
+  pageExtensions: ["tsx", "ts", "jsx", "js"].filter(
+    (ext) => !ext.includes("test")
+  ),
 };
 
 module.exports = nextConfig;
