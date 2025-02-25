@@ -1,30 +1,34 @@
 import { api } from "@/lib/api";
 
-export interface BudgetData {
+export interface Budget {
+  id: string;
   category: string;
   amount: number;
-  startDate: string;
-  endDate: string;
+  spent: number;
 }
 
 export const budgetService = {
-  getAll: async () => {
-    const response = await api.get("/budgets");
+  getAll: async (): Promise<Budget[]> => {
+    try {
+      const response = await api.get("/api/budgets");
+      return response.data;
+    } catch (error) {
+      console.error("Failed to fetch budgets:", error);
+      return [];
+    }
+  },
+
+  create: async (data: Omit<Budget, "id" | "spent">): Promise<Budget> => {
+    const response = await api.post("/api/budgets", data);
     return response.data;
   },
 
-  create: async (data: BudgetData) => {
-    const response = await api.post("/budgets", data);
+  update: async (id: string, data: Partial<Budget>): Promise<Budget> => {
+    const response = await api.put(`/api/budgets/${id}`, data);
     return response.data;
   },
 
-  update: async (id: string, data: Partial<BudgetData>) => {
-    const response = await api.put(`/budgets/${id}`, data);
-    return response.data;
-  },
-
-  delete: async (id: string) => {
-    const response = await api.delete(`/budgets/${id}`);
-    return response.data;
+  delete: async (id: string): Promise<void> => {
+    await api.delete(`/api/budgets/${id}`);
   },
 };

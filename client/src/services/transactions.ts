@@ -1,50 +1,58 @@
 import { api } from "@/lib/api";
+import { ReactNode } from "react";
 
-export interface TransactionData {
+export interface Transaction {
+  id: string;
+  name: ReactNode;
   amount: number;
   category: string;
   description: string;
   type: "income" | "expense";
   date: string;
+  icon?: string;
 }
 
-interface RecurringTransactionData extends TransactionData {
+export interface RecurringTransactionData {
+  amount: number;
+  type: "income" | "expense";
+  category: string;
+  description: string;
   frequency: "daily" | "weekly" | "monthly" | "yearly";
   startDate: string;
   endDate?: string;
+  date: string;
 }
 
 export const transactionService = {
-  // Get all transactions
-  getAll: async () => {
-    const response = await api.get("/transactions");
+  getAll: async (): Promise<Transaction[]> => {
+    try {
+      const response = await api.get("/api/transactions");
+      return response.data;
+    } catch (error) {
+      console.error("Failed to fetch transactions:", error);
+      return [];
+    }
+  },
+
+  create: async (data: Omit<Transaction, "id">): Promise<Transaction> => {
+    const response = await api.post("/api/transactions", data);
     return response.data;
   },
 
-  // Create new transaction
-  create: async (data: TransactionData) => {
-    const response = await api.post("/transactions", {
-      ...data,
-      date: new Date(data.date).toISOString(),
-    });
+  update: async (
+    id: string,
+    data: Partial<Transaction>
+  ): Promise<Transaction> => {
+    const response = await api.put(`/api/transactions/${id}`, data);
     return response.data;
   },
 
-  // Update transaction
-  update: async (id: string, data: Partial<TransactionData>) => {
-    const response = await api.put(`/transactions/${id}`, data);
-    return response.data;
+  delete: async (id: string): Promise<void> => {
+    await api.delete(`/api/transactions/${id}`);
   },
 
-  // Delete transaction
-  delete: async (id: string) => {
-    const response = await api.delete(`/transactions/${id}`);
-    return response.data;
-  },
-
-  // Add new methods
-  createRecurring: async (recurringData: RecurringTransactionData) => {
-    const response = await api.post("/transactions/recurring", recurringData);
+  createRecurring: async (data: RecurringTransactionData) => {
+    const response = await api.post("/api/transactions/recurring", data);
     return response.data;
   },
 

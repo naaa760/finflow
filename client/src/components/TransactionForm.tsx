@@ -23,6 +23,7 @@ export default function TransactionForm({ onSuccess }: TransactionFormProps) {
         ...formData,
         amount: parseFloat(formData.amount),
         type: formData.type as "expense" | "income",
+        name: formData.description,
       });
       setFormData({
         amount: "",

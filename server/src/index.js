@@ -1,15 +1,15 @@
+const dotenv = require("dotenv");
+dotenv.config();
+
 const express = require("express");
 const cors = require("cors");
-const dotenv = require("dotenv");
 const { PrismaClient } = require("@prisma/client");
 const errorHandler = require("./middleware/errorHandler");
 const prisma = require("./config/database");
 const logger = require("./utils/logger");
 const { helmet, limiter } = require("./middleware/security");
 const authRoutes = require("./routes/auth");
-
-// Load environment variables
-dotenv.config();
+const plaidRoutes = require("./api/plaid");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -17,12 +17,7 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(
   cors({
-    origin: [
-      "http://localhost:3000",
-      "https://finflow-zhsh.vercel.app",
-      "https://finflow-client.vercel.app",
-      "https://finflow-git-main-naaa760.vercel.app",
-    ],
+    origin: process.env.CLIENT_URL || "http://localhost:3000",
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "Origin"],
@@ -46,15 +41,27 @@ app.use("/api/auth", authRoutes);
 app.use("/api/transactions", require("./api/transactions"));
 app.use("/api/budgets", require("./api/budgets"));
 app.use("/api/investments", require("./api/investments"));
-app.use("/api/plaid", require("./api/plaid"));
+app.use("/api/plaid", plaidRoutes);
 
 // Add error handler after all routes
 app.use(errorHandler);
 
-// Start server
-app.listen(PORT, () => {
-  logger.info(`Server running on port ${PORT}`);
-});
+const startServer = async () => {
+  try {
+    app.listen(PORT, () => {
+      logger.info(`Server running on port ${PORT}`);
+    });
+  } catch (error) {
+    if (error.code === "EADDRINUSE") {
+      logger.error(`Port ${PORT} is already in use`);
+      process.exit(1);
+    }
+    logger.error("Failed to start server:", error);
+    process.exit(1);
+  }
+};
+
+startServer();
 
 // Handle graceful shutdown
 process.on("SIGTERM", async () => {

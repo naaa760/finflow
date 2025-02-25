@@ -9,6 +9,7 @@ const nextConfig = {
         pathname: "/**",
       },
     ],
+    domains: ["images.clerk.dev"],
   },
   pageExtensions: ["tsx", "ts", "jsx", "js"].filter(
     (ext) => !ext.includes("test")

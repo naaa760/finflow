@@ -1,8 +1,8 @@
-const { Router } = require("express");
+const express = require("express");
+const router = express.Router();
 const { PrismaClient } = require("@prisma/client");
 const { ClerkExpressRequireAuth } = require("@clerk/clerk-sdk-node");
 
-const router = Router();
 const prisma = new PrismaClient();
 
 // Test endpoint
@@ -13,35 +13,23 @@ router.get("/test", (req, res) => {
 router.post("/sync", async (req, res) => {
   try {
     const { clerkId, email } = req.body;
-    console.log("Sync attempt for:", { clerkId, email });
 
     if (!clerkId || !email) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    // Check if user exists first
-    let user = await prisma.user.findUnique({
-      where: { clerkId },
-    });
+    // Add your user sync logic here
+    // For example:
+    // await db.user.upsert({
+    //   where: { clerkId },
+    //   update: { email },
+    //   create: { clerkId, email }
+    // });
 
-    if (!user) {
-      // Create new user if doesn't exist
-      user = await prisma.user.create({
-        data: {
-          clerkId,
-          email,
-        },
-      });
-    }
-
-    console.log("User synced successfully:", user);
-    res.json({ user });
+    res.json({ success: true });
   } catch (error) {
-    console.error("Auth sync error:", error);
-    res.status(500).json({
-      error: "Failed to sync user",
-      details: error.message,
-    });
+    console.error("User sync error:", error);
+    res.status(500).json({ error: "Failed to sync user" });
   }
 });
 

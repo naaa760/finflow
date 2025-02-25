@@ -154,21 +154,14 @@ export default function Dashboard() {
       if (!isLoaded || !user) return;
 
       try {
-        console.log("Attempting to sync user:", {
+        await api.post("/api/auth/sync", {
           clerkId: user.id,
           email: user.emailAddresses[0].emailAddress,
         });
-
-        const response = await api.post("/api/auth/sync", {
-          clerkId: user.id,
-          email: user.emailAddresses[0].emailAddress,
-        });
-
-        console.log("Sync successful:", response.data);
       } catch (error) {
         console.error("Failed to sync user:", error);
         addNotification(
-          "Failed to sync user data. Please try refreshing the page.",
+          "Failed to sync user data. Please try again later.",
           "error"
         );
       }

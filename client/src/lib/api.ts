@@ -1,37 +1,49 @@
-import axios from "axios";
+import axios, {
+  AxiosError,
+  InternalAxiosRequestConfig,
+  AxiosRequestHeaders,
+} from "axios";
+
+interface CustomRequestConfig extends InternalAxiosRequestConfig {
+  headers: AxiosRequestHeaders;
+}
 
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL?.trim(),
+  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000",
   headers: {
     "Content-Type": "application/json",
   },
   withCredentials: true,
 });
 
-// Add request interceptor
-api.interceptors.request.use(async (config) => {
-  try {
-    if (typeof window !== "undefined") {
-      const token = await window.Clerk?.session?.getToken();
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
+// Request interceptor
+api.interceptors.request.use(
+  async (config: CustomRequestConfig) => {
+    try {
+      if (typeof window !== "undefined") {
+        const token = await window.Clerk?.session?.getToken();
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
       }
+      return config;
+    } catch (error) {
+      console.error("Error getting auth token:", error);
+      return config;
     }
-    return config;
-  } catch (error) {
-    console.error("Error getting auth token:", error);
-    return config;
-  }
-});
+  },
+  (error) => Promise.reject(error)
+);
 
-// Add response interceptor
+// Response interceptor
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error: AxiosError) => {
     console.error("API Error:", {
+      url: error.config?.url,
+      method: error.config?.method,
       status: error.response?.status,
       data: error.response?.data,
-      message: error.message,
     });
     return Promise.reject(error);
   }

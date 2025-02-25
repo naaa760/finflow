@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { transactionService } from "@/services/transactions";
+import { RecurringTransactionData } from "@/services/transactions";
 
 interface RecurringTransactionFormProps {
   onSuccess: () => void;
@@ -9,12 +10,14 @@ interface RecurringTransactionFormProps {
 export default function RecurringTransactionForm({
   onSuccess,
 }: RecurringTransactionFormProps) {
-  const [formData, setFormData] = useState({
-    amount: "",
+  const [formData, setFormData] = useState<
+    Omit<RecurringTransactionData, "id" | "name">
+  >({
+    amount: 0,
+    type: "expense",
     category: "",
     description: "",
-    type: "expense" as "income" | "expense",
-    frequency: "monthly" as "daily" | "weekly" | "monthly" | "yearly",
+    frequency: "monthly",
     startDate: new Date().toISOString().split("T")[0],
     endDate: "",
     date: new Date().toISOString().split("T")[0],
@@ -25,13 +28,11 @@ export default function RecurringTransactionForm({
     try {
       await transactionService.createRecurring({
         ...formData,
-        amount: parseFloat(formData.amount),
-        type: formData.type,
-        frequency: formData.frequency,
+        amount: parseFloat(formData.amount.toString()),
       });
       onSuccess();
     } catch (error) {
-      console.error("Error creating recurring transaction:", error);
+      console.error("Failed to create recurring transaction:", error);
     }
   };
 
