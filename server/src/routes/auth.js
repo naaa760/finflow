@@ -13,6 +13,7 @@ router.get("/test", (req, res) => {
 router.post("/sync", async (req, res) => {
   try {
     const { clerkId, email } = req.body;
+    console.log("Sync attempt for:", { clerkId, email });
 
     if (!clerkId || !email) {
       return res.status(400).json({ error: "Missing required fields" });
@@ -24,14 +25,18 @@ router.post("/sync", async (req, res) => {
       create: {
         clerkId,
         email,
-        // Add any other required fields from your User model
       },
     });
 
+    console.log("User synced successfully:", user);
     res.json({ user });
   } catch (error) {
     console.error("Auth sync error:", error);
-    res.status(500).json({ error: "Failed to sync user" });
+    res.status(500).json({
+      error: "Failed to sync user",
+      details:
+        process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
   }
 });
 

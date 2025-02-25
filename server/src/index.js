@@ -19,13 +19,13 @@ app.use(
   cors({
     origin: [
       "http://localhost:3000",
+      "https://finflow-zhsh.vercel.app",
       "https://finflow-client.vercel.app",
       "https://finflow-git-main-naaa760.vercel.app",
-      process.env.NEXT_PUBLIC_CLIENT_URL,
     ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: ["Content-Type", "Authorization", "Origin", "Accept"],
   })
 );
 app.use(express.json());

@@ -10,22 +10,27 @@ const api = axios.create({
 
 // Add auth token to requests
 api.interceptors.request.use(async (config) => {
-  if (typeof window !== "undefined") {
-    const token = await window.Clerk?.session?.getToken();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+  try {
+    if (typeof window !== "undefined") {
+      const token = await window.Clerk?.session?.getToken();
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
+    return config;
+  } catch (error) {
+    console.error("Error getting auth token:", error);
+    return config;
   }
-  return config;
 });
 
 // Add response interceptor for error handling
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    console.error("API Error:", error.response?.data || error.message);
     if (error.response?.status === 401) {
-      // Handle unauthorized
-      window.location.href = "/";
+      window.location.href = "/sign-in";
     }
     return Promise.reject(error);
   }
