@@ -1,14 +1,7 @@
 import axios from "axios";
 
-const getBaseUrl = () => {
-  if (process.env.NODE_ENV === "production") {
-    return process.env.NEXT_PUBLIC_API_URL;
-  }
-  return "http://localhost:5000";
-};
-
-export const api = axios.create({
-  baseURL: getBaseUrl(),
+const api = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
   headers: {
     "Content-Type": "application/json",
   },
@@ -45,3 +38,5 @@ export const fetchApi = async <T>(
   const response = await api.get(endpoint, options);
   return response.data;
 };
+
+export { api };

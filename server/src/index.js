@@ -21,13 +21,11 @@ app.use(
       "http://localhost:3000",
       "https://finflow-client.vercel.app",
       "https://finflow-git-main-naaa760.vercel.app",
-      "https://finflow-xdmi.onrender.com",
       process.env.NEXT_PUBLIC_CLIENT_URL,
     ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "Origin", "Accept"],
-    exposedHeaders: ["Content-Range", "X-Content-Range"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 app.use(express.json());
